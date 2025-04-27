@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# 1. Calculate RMSD for the protein (assuming protein is group 4)
+echo 4 4 | gmx rms -s ../step5_1.tpr -f ../md.xtc -o rmsd_protein.xvg -tu ns
+
+# 2. Calculate RMSD for the ligand (assuming ligand is group 13)
+echo 13 13 | gmx rms -s ../step5_1.tpr -f ../md.xtc -o rmsd_ligand.xvg -tu ns
+
+# 3. Analyze the RMSD of the protein
+gmx analyze -f rmsd_protein.xvg -bw 0.01 -dist rmd_protein
+
+# 4. Analyze the RMSD of the ligand
+gmx analyze -f rmsd_ligand.xvg -bw 0.01 -dist rmd_ligand
+
+# 5. Calculate RMSD distance between the ligand and the protein (group 13 vs group 4)
+echo 13 4 | gmx rmsdist -f ../md.xtc -s ../step5_1.tpr -o rmsdist_ligand_protein.xvg
+
+# 6. Analyze the RMSD distance between ligand and protein
+gmx analyze -f rmsdist_ligand_protein.xvg -bw 0.01 -dist rmdist_ligand_protein
+
+# 7. Calculate the Radius of Gyration (Rg) for the entire complex (protein + ligand = group 1, adjust if needed)
+echo 1 | gmx gyrate -s ../step5_1.tpr -f ../md.xtc -o gyrate_complex.xvg
+
+# 8. Calculate Solvent Accessible Surface Area (SASA) for the entire complex
+echo 1 | gmx sasa -f ../md.xtc -s ../step5_1.tpr -o sasa_complex.xvg
+
+# 9. Calculate RMSF for the protein (assuming the protein is group 4)
+echo 4 | gmx rmsf -f ../md.xtc -s ../step5_1.tpr -o rmsf_protein.xvg -oq -ox -b 50000 -res
+
+# 10. Calculate RMSF for the ligand (assuming the ligand is group 13)
+echo 13 | gmx rmsf -f ../md.xtc -s ../step5_1.tpr -o rmsf_ligand.xvg -oq -ox -b 50000 -res
